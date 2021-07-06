@@ -9,17 +9,21 @@ use App\Models\Municipio;
 use App\Models\Rol;
 use App\Models\Sucursal;
 use App\Models\TipoRequerimiento;
+use App\User;
 use Illuminate\Http\Request;
 
 class ParametroController extends Controller
 {
     public function categoria(){
-
-
+        $categoria = Categoria::where('baja_logica', false)
+            ->orderBy('id_categoria', 'asc')
+            ->get();
         return response()->json([
             'respuesta' => true,
-            'categorias' => Categoria::all()
+            'categorias' => $categoria
         ]);
+
+
     }
 
     public function indexcat (Request $request){
@@ -45,8 +49,9 @@ class ParametroController extends Controller
         $categoria->save();
 
         return response()->json([
-            'respuesta'=>true,
-            'categoria'=>$categoria]);
+            'respuesta' => true,
+            'mensaje' => 'Categoria creada con éxito'
+        ]);
     }
     public function updateCategoria(Request $request, $id)
     {
@@ -67,12 +72,12 @@ class ParametroController extends Controller
 
     public function eliminarCategoria(Request $request)
     {
-        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+       /* if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
-        }
+        }*/
         $categoria = Categoria::findOrFail($request->input('id_categoria'));
         $categoria->baja_logica = true;
         $categoria->save();
@@ -83,7 +88,7 @@ class ParametroController extends Controller
     }
 
 
-    
+
     public function tipoRequerimiento($id){
         $tipoRequerimientos = TipoRequerimiento::where('categoria_id_categoria', $id)
             ->get();
@@ -169,9 +174,15 @@ class ParametroController extends Controller
 
 
     public function municipio(){
+        $municipio = Municipio::where('baja_logica', false)
+            ->orderBy('id_lugar', 'asc')
+            ->get();
         return response()->json([
             'respuesta' => true,
-            'municipios' => Municipio::all()
+            'municipios' => $municipio
+       /* return response()->json([
+            'respuesta' => true,
+            'municipios' => Municipio::all()*/
         ]);
     }
  public function indexmunicipio (Request $request){
@@ -198,7 +209,7 @@ class ParametroController extends Controller
 
         return response()->json([
             'respuesta'=>true,
-            'municipio'=>$municipio
+            'mensaje'=>'Municipio creado con éxito'
         ]);
     }
     public function updatemunicipio(Request $request, $id)
@@ -220,12 +231,12 @@ class ParametroController extends Controller
 
     public function eliminarmunicipio(Request $request)
     {
-        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
-        }
+        }*/
         $municipio = Municipio::findOrFail($request->input('id_lugar'));
         $municipio->baja_logica = true;
         $municipio->save();
@@ -304,12 +315,12 @@ class ParametroController extends Controller
 
     public function eliminardepartamento(Request $request)
     {
-        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
-        }
+        }*/
         $departamento = Departamento::findOrFail($request->input('id_departamento'));
         $departamento->baja_logica = true;
         $departamento->save();
@@ -328,12 +339,78 @@ class ParametroController extends Controller
         ]);
     }
 
+
     public function cargo(){
         return response()->json([
             'respuesta' => true,
             'cargos' => Cargo::all()
         ]);
     }
+    public function indexcargo (Request $request){
+        $cargo = Cargo::where('baja_logica', false)
+            ->orderBy('id_cargo', 'asc')
+            ->get();
+        return response()->json([
+            'respuesta' => true,
+            'categorias' => $cargo
+        ]);
+    }
+    public function storecargo(Request $request)
+    {
+        $this->validate($request, [
+            'cod' => ['required'],
+            'cargo' => ['required'],
+            'prioridad_id_prioridad' => ['requered']
+
+        ]);
+        $cargo = new Cargo();
+        $cargo->cod = $request->cod;
+        $cargo->cargo = $request->cargo;
+        $cargo->prioridad_id_prioridad = $request->prioridad_id_prioridad;
+
+        $cargo->save();
+
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Cargo creado con éxito'
+        ]);
+    }
+    public function updatecargo(Request $request, $id)
+    {
+        $this->validate($request, [
+            'cod' => [],
+            'cargo' => [],
+            'prioridad_id_prioridad' => []
+
+        ]);
+        $cargo = Cargo::findOrFail($id);
+        $cargo->cod = $request->input('cod');
+        $cargo->categoria = $request->input('categoria');
+        $cargo->save();
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Cargo editado con éxito'
+        ]);
+    }
+
+    public function eliminarcargo(Request $request)
+    {
+        /* if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+             return  response()->json([
+                 'respuesta' => false,
+                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+             ]);
+         }*/
+        $cargo = Cargo::findOrFail($request->input('id_cargo'));
+        $cargo->baja_logica = true;
+        $cargo->save();
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Cargo eliminado con éxito'
+        ]);
+    }
+
+
 
     public function rol(){
         return response()->json([
