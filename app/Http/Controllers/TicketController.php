@@ -28,7 +28,7 @@ class TicketController extends Controller
     }
 
     public function listadoReqAdmin(){
-        $tickets = Ticket::listadoTikets();
+        $tickets = Ticket::listadoTiketsAdmin();
         return response()->json([
             'respuesta' => true,
             'tickets' => $tickets
