@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Maatwebsite\Excel\Facades\Excel;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,3 +20,11 @@ Route::get('/', function () {
 
 Route::get('send-mail', function () {
 });
+
+// Route::get('/', function () {
+//     return Excel::download(new UsersExport, 'users.pdf');
+// });
+
+// Route::get('pdf', function () {
+//     return Excel::download(new UsersExport, 'users.pdf');
+// });

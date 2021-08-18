@@ -337,12 +337,12 @@ class TicketController extends Controller
             ]);
         }
         return response()->json([
-            'mensaje' => 'Se ha enviado correos a los tickets En Proceso con mora',
+            'mensaje' => 'Se han enviado correos a los tickets En Proceso con mora',
             'correos' => $correos
         ]);
     }
 
-    public function ticketEnEspera(){
+     public function ticketEnEspera(){
         $tickets = Ticket::ticketsEnEspera();
         $correos = [];
         foreach ($tickets as $ticket) {
@@ -363,9 +363,8 @@ class TicketController extends Controller
             ]);
         }
         return response()->json([
-            'mensaje' => 'Se ha enviado correos a los tickets En Espera con mora',
+            'mensaje' => 'Se ha enviado correos a los tickets en espera con mora',
             'correos' => $correos
         ]);
     }
-
 }

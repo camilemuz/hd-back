@@ -73,12 +73,7 @@ class ParametroController extends Controller
 
     public function eliminarCategoria(Request $request)
     {
-       /* if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
+    
         $categoria = Categoria::findOrFail($request->input('id_categoria'));
         $categoria->baja_logica = true;
         $categoria->save();
@@ -157,12 +152,7 @@ class ParametroController extends Controller
 
     public function eliminartiporeq (Request $request)
     {
-        // if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-        //     return  response()->json([
-        //         'respuesta' => false,
-        //         'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-        //     ]);
-        // }
+      
         $tipoRequerimiento = TipoRequerimiento::findOrFail($request->input('id_tipo_req'));
         $tipoRequerimiento->baja_logica = true;
         $tipoRequerimiento->save();
@@ -232,12 +222,7 @@ class ParametroController extends Controller
 
     public function eliminarmunicipio(Request $request)
     {
-        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
+       
         $municipio = Municipio::findOrFail($request->input('id_lugar'));
         $municipio->baja_logica = true;
         $municipio->save();
@@ -312,12 +297,7 @@ class ParametroController extends Controller
 
     public function eliminarsucursal(Request $request)
     {
-        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
+        
         $sucursal = Sucursal::findOrFail($request->input('id_sucursal'));
         $sucursal->baja_logica = true;
         $sucursal->save();
@@ -390,12 +370,7 @@ class ParametroController extends Controller
 
     public function eliminardepartamento(Request $request)
     {
-        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
+        
         $departamento = Departamento::findOrFail($request->input('id_departamento'));
         $departamento->baja_logica = true;
         $departamento->save();
@@ -459,12 +434,12 @@ class ParametroController extends Controller
 
     public function eliminardivision(Request $request)
     {
-        /*if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
-        }*/
+        }
         $division = Division::findOrFail($request->input('id_division'));
         $division->baja_logica = true;
         $division->save();
@@ -545,12 +520,7 @@ class ParametroController extends Controller
 
     public function eliminarcargo(Request $request)
     {
-        /* if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-             return  response()->json([
-                 'respuesta' => false,
-                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-             ]);
-         }*/
+        
         $cargo = Cargo::findOrFail($request->input('id_cargo'));
         $cargo->baja_logica = true;
         $cargo->save();
@@ -628,5 +598,13 @@ class ParametroController extends Controller
             'respuesta' => true,
             'roles' => Rol::all()
         ]);
+    }
+
+    private function obtieneIdUsuario($email){
+        $usuario = User::where('email', $email)
+            ->where('baja_logica', false)
+            ->first();
+        if ($usuario == null) return null;
+        else return $usuario->id_usuario;
     }
 }
