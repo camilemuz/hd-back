@@ -225,5 +225,5 @@ class Ticket extends Model
         );
     }
    
-
+    
 }
