@@ -78,6 +78,14 @@ class TicketController extends Controller
         //TODO
         $asignado->asignado = '';
         $asignado->save();
+        //se prepara el correo para el solicitante a su cuenta
+        $detalles = [
+            'titulo' => 'Alerta',
+            'body' => " $ticketActivo->comentarios Su solicitud fue tomada por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno"
+        ];
+        $requerimiento = Requerimiento::findOrFail($ticket->requerimiento_id_requerimiento);
+        $usuarioRequerimiento = User::findOrFail($requerimiento->usuario_id_usuario);
+        \Mail::to($usuarioRequerimiento->email)->send(new \App\Mail\InvoiceMail($detalles));
         return response()->json([
             'respuesta' => true,
             'mensaje' => 'Ticket tomado con exito'
@@ -206,4 +214,109 @@ class TicketController extends Controller
             'requerimiento' => $requerimientos[0]
         ]);
     }
+    public function ticket($id_ticket)
+    {
+        $requerimiento = Requerimiento::findOrFail($id_ticket);
+        $query = Requerimiento::requerimientoDetalle($requerimiento->id_requerimiento);
+        foreach ($query as $item) {
+            $requerimientoDetalle = $item;
+        }
+        return response()->json([
+            'respuesta' => true,
+            'requerimiento' => $requerimientoDetalle
+        ]);
+    }
+
+    public function cambiarEstado(Request $request)
+    {
+        $tickets = Ticket::where('numero', $request->input('numero'))
+            ->get();
+        foreach ($tickets as $ticket) {
+            if ($ticket->id_padre == null) {
+                $ticket->activo = true;
+            } else {
+                $ticket->activo = false;
+                $ticket->baja_logica = true;
+                $asignados = Asignado::where('ticket_id_ticket', $ticket->id_ticket)
+                    ->where('baja_logica', false)
+                    ->get();
+                foreach ($asignados as $asignado) {
+                    $asignado->baja_logica = true;
+                    $asignado->save();
+                }
+            }
+            $ticket->save();
+        }
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Se cambio el estado del Ticket'
+        ]);
+    }
+
+    public function cambioAgente(Request $request)
+    {
+        $asignados = Asignado::where('ticket_id_ticket', $request->input('id_ticket'))
+            ->where('baja_logica', false)
+            ->get();
+        foreach ($asignados as $asignado) {
+            $asignado->usuario_id_usuario = $request->input('id_usuario');
+            $asignado->save();
+        }
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Se cambio el Agente del Ticket'
+        ]);
+    }
+
+    
+    public function ticketProceso(){
+        $tickets = Ticket::ticketsProceso();
+        $correos = [];
+        foreach ($tickets as $ticket) {
+            if ($ticket->dias_pasados >= 2){
+                //se prepara el correo para el solicitante a su cuenta
+                $detalles = [
+                    'titulo' => 'Alerta de Ticket en Espera',
+                    'body' => "Sr. $ticket->nombre $ticket->ap_paterno: \n Tiene el ticket Nª: $ticket->numero en espera hace mas de 2 dias, tiene que TERMINAR"
+                ];
+                \Mail::to($ticket->email)->send(new \App\Mail\InvoiceMail($detalles));
+                array_push($correos, $ticket->email);
+            }
+        }
+        if (count($correos) == 0){
+            return response()->json([
+                'mensaje' => 'No hay tickets de mora'
+            ]);
+        }
+        return response()->json([
+            'mensaje' => 'Se ha enviado correos a los tickets en proceso con mora',
+            'correos' => $correos
+        ]);
+    }
+
+    public function ticketEnEspera(){
+        $tickets = Ticket::ticketsEnEspera();
+        $correos = [];
+        foreach ($tickets as $ticket) {
+            if ($ticket->dias_pasados >= 2){
+                //se prepara el correo para el solicitante a su cuenta
+                $detalles = [
+                    'titulo' => 'Alerta de Ticket en Espera',
+                    'body' => "Sr. $ticket->nombre $ticket->ap_paterno: \n Tiene el ticket Nª: $ticket->numero en espera hace mas de 2 dias, tiene que TOMARLO"
+                ];
+                \Mail::to($ticket->email)->send(new \App\Mail\InvoiceMail($detalles));
+                array_push($correos, $ticket->email);
+            }
+        }
+        if (count($correos) == 0){
+            return response()->json([
+                'mensaje' => 'No hay tickets de mora'
+            ]);
+        }
+        return response()->json([
+            'mensaje' => 'Se ha enviado correos a los tickets en espera con mora',
+            'correos' => $correos
+        ]);
+    }
+
 }

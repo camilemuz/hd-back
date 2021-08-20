@@ -13,7 +13,7 @@ class Requerimiento extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'descripcion', 'usuario_id_usuario', 'interno', 'tipo_requerimiento_id_tipo_req', 'departamento_id_departamento', 'sucursal_id_sucursal'
+        'descripcion', 'usuario_id_usuario', 'interno', 'media','tipo_requerimiento_id_tipo_req', 'departamento_id_departamento', 'sucursal_id_sucursal'
     ];
     protected $hidden = [
         'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
@@ -38,6 +38,28 @@ class Requerimiento extends Model
                             a.fecha_registro        
                     from public.requerimiento a
                     where id_requerimiento = ?", [$idRequerimiento]
+        );
+    }
+
+    public static function requerimientoDetalle($idRequerimiento){
+        return DB::connection('help')->select(
+            "SELECT
+                  a.id_requerimiento,
+                  a.descripcion,
+                  a.usuario_id_usuario,
+                  a.interno,
+                  a.media,
+                  a.tipo_requerimiento_id_tipo_req,
+                  (select categoria_id_categoria
+                  from public.tipo_requerimiento
+                  where id_tipo_req = a.tipo_requerimiento_id_tipo_req limit 1) categoria_id,
+                  a.departamento_id_departamento,
+                  a.sucursal_id_sucursal,
+                  (select municipio_id_lugar
+                  from public.sucursal
+                  where id_sucursal = a.sucursal_id_sucursal limit 1) municipio_id
+                FROM public.requerimiento a
+                where id_requerimiento = ?", [$idRequerimiento]
         );
     }
 }

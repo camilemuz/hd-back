@@ -121,4 +121,49 @@ class Ticket extends Model
                     order by fecha_registro", [$numero, $numero]
         );
     }
+
+    
+    public static function ticketsProceso(){
+        return DB::connection('help')->select(
+            "SELECT 
+                      a.id_ticket,
+                      a.numero,
+                      a.requerimiento_id_requerimiento,
+                      a.comentarios,
+                      b.usuario_id_usuario,
+                      c.email,
+                      c.nombre,
+                      c.ap_paterno,
+                      c.ap_materno,
+                      EXTRACT(DAY FROM age(timestamp 'now()',date(a.fecha_registro))) as dias_pasados
+                    FROM public.ticket a
+                    inner join public.asignado b on a.id_ticket = b.ticket_id_ticket
+                    inner join public.usuario c on b.usuario_id_usuario = c.id_usuario
+                    where a.estado_id_estado = ?
+                    and a.baja_logica is false
+                    and a.activo is true", [ Estado::EN_PROCESO ]
+        );
+    }
+
+    public static function ticketsEnEspera(){
+        return DB::connection('help')->select(
+            "SELECT 
+                      a.id_ticket,
+                      a.numero,
+                      a.requerimiento_id_requerimiento,
+                      a.comentarios,  
+                      d.email,
+                      d.nombre,
+                      d.ap_paterno,
+                      d.ap_materno,
+                      EXTRACT(DAY FROM age(timestamp 'now()',date(a.fecha_registro))) as dias_pasados
+                    FROM public.ticket a
+                    inner join public.requerimiento b on a.requerimiento_id_requerimiento = b.id_requerimiento
+                    inner join public.tipo_requerimiento c on b.tipo_requerimiento_id_tipo_req = c.id_tipo_req
+                    inner join public.usuario d on c.division_id_division = d.division_id_division
+                    where a.estado_id_estado = ?
+                    and a.baja_logica is false
+                    and a.activo is true;", [ Estado::EN_ESPERA ]
+        );
+    }
 }

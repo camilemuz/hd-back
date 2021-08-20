@@ -62,6 +62,13 @@ Route::group(['prefix' => 'agente'], function() {
     Route::post('tomar_ticket', 'TicketController@tomarTicket');
     Route::post('terminar_ticket', 'TicketController@terminarTicket');
     Route::post('historico', 'TicketController@historico');
+    Route::post('cambiar_estado', 'TicketController@cambiarEstado');
+    Route::get('ticket/{id_ticket}', 'TicketController@ticket');
+    Route::get('listado', 'UsuarioController@listarAgentes');
+    Route::post('cambio_agente', 'TicketController@cambioAgente');
+    
+    Route::get('enviar_correo_proceso', 'TicketController@ticketProceso');
+    Route::get('enviar_correo_espera', 'TicketController@ticketEnEspera');
 });
 Route::group(['prefix' => 'admin'], function() {
     Route::put('store/{id}', 'UsuarioController@store');
