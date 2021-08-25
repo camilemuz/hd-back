@@ -74,7 +74,7 @@ class Ticket extends Model
                             (select sucursal from public.sucursal where b.sucursal_id_sucursal = id_sucursal limit 1) sucursal,
                              e.nombre || ' ' || e.ap_paterno || ' ' || e.ap_materno as usuario_requerimiento,
                             f.prioridad_id_prioridad id_prioridad,
-                            (select prioridad from public.prioridad where id_prioridad = f.prioridad_id_prioridad) prioridad,
+                            (select prioridad from public.prioridad where id_prioridad = f.prioridad_id_prioridad limit 1) prioridad,
                         b.archivo,b.interno
                     from public.ticket a
                     inner join public.requerimiento b on a.requerimiento_id_requerimiento = b.id_requerimiento
@@ -225,5 +225,5 @@ class Ticket extends Model
         );
     }
    
-    
+
 }
