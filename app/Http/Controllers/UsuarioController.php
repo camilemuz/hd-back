@@ -85,9 +85,7 @@ class UsuarioController extends Controller
     
       if($user->password == NULL){
         $pass ='Mda'. $user->ci;
-        // $user->password = bcrypt($request->input('Mda123456'));
         $user->password = bcrypt($pass);
-        // return $user->toSql();
         $user->save();
     }
     // return response()->json([
