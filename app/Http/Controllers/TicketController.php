@@ -73,6 +73,13 @@ class TicketController extends Controller
                 'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
             ]);
         }
+        // if ($usuario = $this->obtieneIdUsuario($request->input('email') != Rol::FUNCIONARIO)==NULL){
+        //     return  response()->json([
+        //         'respuesta' => false,
+        //         'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
+        //     ]);
+        // }
+
         //buscamos el anterior ticket para inactivarlo
         $ticket = Ticket::findOrFail($request->input('idTicket'));
         $ticket->activo = Ticket::INACTIVO;
@@ -90,15 +97,17 @@ class TicketController extends Controller
         /*$asignado->usuario_id_usuario = $idUsuario;*/
         $asignado->usuario_id_usuario = $usuario->id_usuario;
         $asignado->ticket_id_ticket = $ticketActivo->id_ticket;
-        $asignado->fecha = date('d/m/Y');
+        $asignado->fecha = date("F j, Y, g:i a");
         //TODO
         $asignado->asignado = '';
         $asignado->save();
         //se prepara el correo para el solicitante a su cuenta
         $detalles = [
             'titulo' => 'Seguimiento de Ticket',
-            'body' => " $ticketActivo->comentarios Su solicitud fue tomada por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno.", 
-            'descripcion' =>"El día $asignado->fecha"
+            'body' => "Su solicitud fue tomada por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno", 
+            'descripcion' =>"$ticketActivo->comentarios",
+            'numero' =>"El número del ticket es:  $ticketActivo->numero ",
+            'fecha' =>"Ticket abierto el: $asignado->fecha"
         ];
         $requerimiento = Requerimiento::findOrFail($ticket->requerimiento_id_requerimiento);
         $usuarioRequerimiento = User::findOrFail($requerimiento->usuario_id_usuario);
@@ -147,8 +156,10 @@ class TicketController extends Controller
         //se prepara el correo para el solicitante a su cuenta
         $detalles = [
             'titulo' => 'Alerta, ticket cerrado',
-            'body' => "Su solicitud fue terminado por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno",
-            'descripcion' => "Ticket cerrado a las  $asignado->fecha "
+            'body' => "Su ticket fue cerrado por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno",
+            'descripcion' => "El comentario agregado por el agente fue: $ticketActivo->comentarios",
+            'numero' => "Ticket número: $ticketActivo->numero",
+            'fecha' => "Ticket cerrado el:  $asignado->fecha "
         ];
         $requerimiento = Requerimiento::findOrFail($ticket->requerimiento_id_requerimiento);
         $usuarioRequerimiento = User::findOrFail($requerimiento->usuario_id_usuario);
