@@ -93,7 +93,7 @@ class TicketController extends Controller
         /*$asignado->usuario_id_usuario = $idUsuario;*/
         $asignado->usuario_id_usuario = $usuario->id_usuario;
         $asignado->ticket_id_ticket = $ticketActivo->id_ticket;
-        $asignado->fecha = date('d/m/Y h:i:sa');
+        $asignado->fecha = date('d/m/Y');
         //TODO
         $asignado->asignado = '';
         $asignado->save();
@@ -141,7 +141,7 @@ class TicketController extends Controller
        /* $asignado->usuario_id_usuario = $idUsuario;*/
         $asignado->usuario_id_usuario = $usuario->id_usuario;
         $asignado->ticket_id_ticket = $ticketActivo->id_ticket;
-        $asignado->fecha = date('d/m/Y h:i:sa');
+        $asignado->fecha = date('d/m/Y');
         //TODO
         $asignado->asignado = '';
         $asignado->save();
