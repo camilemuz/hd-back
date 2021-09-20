@@ -68,11 +68,14 @@ class TicketController extends Controller
         //validando que solamente un AGENTE puede tomar un ticket
 
         if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::AGENTE)) == null) {
-            return response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
-            ]);
+            if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::ADMINISTRADOR)) == null) {
+                return response()->json([
+                    'respuesta' => false,
+                    'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
+                ]);
+            }
         }
+      
         //buscamos el anterior ticket para inactivarlo
         $ticket = Ticket::findOrFail($request->input('idTicket'));
         $ticket->activo = Ticket::INACTIVO;
@@ -97,8 +100,10 @@ class TicketController extends Controller
         //se prepara el correo para el solicitante a su cuenta
         $detalles = [
             'titulo' => 'Seguimiento de Ticket',
-            'body' => " $ticketActivo->comentarios Su solicitud fue tomada por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno.", 
-            'descripcion' =>"El día $asignado->fecha"
+            'body' => "Su solicitud fue tomada por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno", 
+            'descripcion' =>"$ticketActivo->comentarios",
+            'numero' =>"El número del ticket es:  $ticketActivo->numero ",
+            'fecha' =>"Ticket abierto el: $asignado->fecha"
         ];
         $requerimiento = Requerimiento::findOrFail($ticket->requerimiento_id_requerimiento);
         $usuarioRequerimiento = User::findOrFail($requerimiento->usuario_id_usuario);
@@ -111,17 +116,13 @@ class TicketController extends Controller
 
     public function terminarTicket(Request $request){
         //validando que solamente un AGENTE puede tomar un ticket
-       /* if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::AGENTE)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
-            ]);
-        }*/
         if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::AGENTE)) == null) {
-            return response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
-            ]);
+            if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::ADMINISTRADOR)) == null) {
+                return response()->json([
+                    'respuesta' => false,
+                    'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
+                ]);
+            }
         }
         //buscamos el anterior ticket para inactivarlo
         $ticket = Ticket::findOrFail($request->input('idTicket'));
@@ -147,8 +148,10 @@ class TicketController extends Controller
         //se prepara el correo para el solicitante a su cuenta
         $detalles = [
             'titulo' => 'Alerta, ticket cerrado',
-            'body' => "Su solicitud fue terminado por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno",
-            'descripcion' => "Ticket cerrado a las  $asignado->fecha "
+            'body' => "Su ticket fue cerrado por $usuario->nombre $usuario->ap_paterno $usuario->ap_materno",
+            'descripcion' => "El comentario agregado por el agente fue: $ticketActivo->comentarios",
+            'numero' => "Ticket número: $ticketActivo->numero",
+            'fecha' => "Ticket cerrado el:  $asignado->fecha "
         ];
         $requerimiento = Requerimiento::findOrFail($ticket->requerimiento_id_requerimiento);
         $usuarioRequerimiento = User::findOrFail($requerimiento->usuario_id_usuario);
@@ -187,12 +190,6 @@ class TicketController extends Controller
             ]);
         }
         //validamos el usurio tipo FUncionario
-        /*if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
         if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null) {
             return response()->json([
                 'respuesta' => false,
@@ -216,13 +213,13 @@ class TicketController extends Controller
             ]);
         }
         //validamos el usurio tipo FUncionario
-       /* if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
-            ]);
-        }*/
-        if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null) {
+        // if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null) {
+        //     return response()->json([
+        //         'respuesta' => false,
+        //         'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+        //     ]);
+        // }
+        if (($usuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null) {
             return response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
@@ -230,25 +227,25 @@ class TicketController extends Controller
         }
         //consultamos que no haya sido calificada anteriormenete
         $consulta = CalificacionTicket::where('ticket_id_ticket', $request->input('ticket'))
-            ->where('usuario_id_usuario', $idUsuario)
-            ->first();
-        if ($consulta != null){
-            return  response()->json([
-                'respuesta' => false,
-                'mensaje' => 'Evaluación ya calificada'
+        ->where('usuario_id_usuario', $usuario->id_usuario)
+        ->first();
+                if ($consulta != null) {
+                return response()->json([
+                    'respuesta' => false,
+                    'mensaje' => 'Evaluación ya calificada'
             ]);
+    
         }
         CalificacionTicket::create([
             'calificacion_id_calificacion' => $request->input('calificacion'),
             'ticket_id_ticket' => $request->input('ticket'),
-            'usuario_id_usuario' => $idUsuario
+            'usuario_id_usuario' => $usuario->id_usuario
         ]);
-        return  response()->json([
+        return response()->json([
             'respuesta' => true,
             'mensaje' => 'Ticket calificado con exito'
         ]);
     }
-
     public function historico(Request $request){
         $tickets = Ticket::historial($request->input('numero'));
         foreach ($tickets as $ticket) {
@@ -324,8 +321,10 @@ class TicketController extends Controller
                 //se prepara el correo para el solicitante a su cuenta
                 $detalles = [
                     'titulo' => 'Cierre de Ticket',
-                    'body' => "Sr. $ticket->nombre $ticket->ap_paterno:  ",
-                    'descripcion' => "Tiene el ticket N°: $ticket->numero en proceso hace mas de 2 dias, el ticket debe ser cerrado"
+                    'body' => " $ticket->nombre $ticket->ap_paterno:  ",
+                    'descripcion' => "Este ticket se encuentra en estado de En proceso hace mas de 2 dias, el ticket debe ser cerrado.",
+                    'numero'=>"Tiene el ticket N°: $ticket->numero",
+                    'fecha'=>""
                 ];
                 \Mail::to($ticket->email)->send(new \App\Mail\InvoiceMail($detalles));
                 array_push($correos, $ticket->email);
@@ -350,8 +349,10 @@ class TicketController extends Controller
                 //se prepara el correo para el solicitante a su cuenta
                 $detalles = [
                     'titulo' => 'Alerta de Ticket en Espera',
-                    'body' => "Sr. $ticket->nombre $ticket->ap_paterno:",
-                    'descripcion'=>"Tiene el ticket N°: $ticket->numero En Espera hace mas de 2 dias, tiene que TOMARLO"
+                    'body' => " $ticket->nombre $ticket->ap_paterno:  ",
+                    'descripcion' => "Este ticket se encuentra en estado de En espera hace mas de 2 dias, el ticket debe tomado.",
+                    'numero'=>"Tiene el ticket N°: $ticket->numero",
+                    'fecha'=>" "
                 ];
                 \Mail::to($ticket->email)->send(new \App\Mail\InvoiceMail($detalles));
                 array_push($correos, $ticket->email);

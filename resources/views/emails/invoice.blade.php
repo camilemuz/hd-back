@@ -11,6 +11,8 @@
 <h1>{{ $detalles['titulo'] }}</h1>
 <p>{{ $detalles['body'] }}</p>
 <p>{{ $detalles['descripcion'] }}</p>
+<p>{{ $detalles['numero'] }}</p>
+<p>{{$detalles['fecha']}}</p>
 <p>Gracias!!</p>
 </body>
 </html>

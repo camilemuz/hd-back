@@ -43,12 +43,12 @@ class Ticket extends Model
                         b.archivo,b.interno
                     from public.ticket a
                     inner join public.requerimiento b on a.requerimiento_id_requerimiento = b.id_requerimiento
-                    inner join public.tipo_requerimiento c on b.tipo_requerimiento_id_tipo_req = c.id_tipo_req
+                    inner join public.tipo_requerimiento c on b.tipo_requerimiento_id_tipo_req = c.id_tipo_req and c.division_id_division = ?
                     inner join public.categoria d on c.categoria_id_categoria = d.id_categoria
                     inner join public.usuario e on b.usuario_id_usuario = e.id_usuario
                     inner join public.cargo f on e.cargo_id_cargo = f.id_cargo
                     where a.baja_logica is false and a.activo is true
-                    and e.division_id_division = ?
+                    
                     order by a.estado_id_estado, f.prioridad_id_prioridad DESC, b.fecha_registro desc", [$idDivision]
         );
     }

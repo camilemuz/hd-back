@@ -52,8 +52,10 @@ class SolicitudRequerimientoController extends Controller
             $respuesta = $ticket->save();
             $detalles = [
                 'titulo' => 'Confirmación',
-                'body' => "Su solicitud fue creada con éxito, con la descripción: $requerimiento->descripcion.Se le mandará un correo cuando un agente haya tomado su Requerimiento.",
-                'descripcion' =>"El número de su ticket es: $ticket->numero"
+                'body' => "Su solicitud fue creada con éxito",
+                'descripcion' =>"con la descripción: $requerimiento->descripcion.Se le mandará un correo cuando un agente haya tomado su Requerimiento.",
+                'numero' =>"El número de su ticket es: $ticket->numero",
+                'fecha' =>""
             ];
             \Mail::to($request->input('email'))->send(new \App\Mail\InvoiceMail($detalles));
             if ($respuesta){
@@ -160,7 +162,7 @@ class SolicitudRequerimientoController extends Controller
         $requerimiento = new Requerimiento();
         $requerimiento->descripcion = $request->input('descripcion');
         $requerimiento->interno = $request->input('interno');
-        // $requerimiento->media = $request->input('media');
+        $requerimiento->archivo = ($request->input('archivo'));
         $requerimiento->usuario_id_usuario = $request->input('usuario_id_usuario');
         $requerimiento->departamento_id_departamento = $request->input('departamento_id_departamento');
         $requerimiento->tipo_requerimiento_id_tipo_req = $request->input('tipo_requerimiento_id_tipo_req');
@@ -179,8 +181,10 @@ class SolicitudRequerimientoController extends Controller
             $respuesta = $ticket->save();
            $detalles = [
                 'titulo' => 'Confirmación',
-                'body' => "Su solicitud fue creada con éxito, con la descripción: $requerimiento->descripcion.Se le mandará un correo cuando un agente haya tomado su Requerimiento.",
-                'descripcion' =>"El número de su ticket es: $ticket->numero"
+                'body' => "Su solicitud fue creada con éxito,",
+                'descripcion' =>"con la descripción: $requerimiento->descripcion.Se le mandará un correo cuando un agente haya tomado su Requerimiento.",
+                'numero' =>"El número de su ticket es: $ticket->numero",
+                'fecha' =>""
             ];
             \Mail::to($request->input('email'))->send(new \App\Mail\InvoiceMail($detalles));
 
